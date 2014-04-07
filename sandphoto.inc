@@ -36,13 +36,13 @@ class Photo
 		switch($bgcolorid)
 		{
 			case "white":
-			$color = imagecolorallocate($this->im, 255, 255, 255);
-			break;
+				$color = imagecolorallocate($this->im, 255, 255, 255);
+				break;
 			case "blue":
-			$color = imagecolorallocate($this->im, 0, 0, 120);
-			break;
+				$color = imagecolorallocate($this->im, 0, 0, 120);
+				break;
 			default:
-			$color = imagecolorallocate($this->im, 0, 0, 120);
+				$color = imagecolorallocate($this->im, 0, 0, 120);
 		}
 		imagefill($this->im, 1, 1, $color);
 		$text = "www.sandcomp.com";
@@ -104,7 +104,7 @@ class Photo
 		$w_start = ($this->container_width- $wn * ($this->target_width + $GAP) + $GAP) / 2;
 		$h_start = ($this->container_height- $hn * ($this->target_height + $GAP) + $GAP) / 2;
 		$this->create_empty_image($bgcolorid);
-		$im2    = imagecreatefromjpeg($path);
+		$im2 = $this->imagecreatefromany($path);
 		for ($i = 0; $i < $wn; $i++)
 		{
 			$pos_x = $w_start + ($this->target_width + $GAP) * $i;
@@ -126,10 +126,17 @@ class Photo
 
 	function download_image($filename)
 	{
+		$ua = $_SERVER["HTTP_USER_AGENT"];
 		$encoded_filename =  urlencode($filename);
 		header("Content-Type: application/octet-stream");
-		//header("Content-Disposition: attachment; filename*=\"utf8''" . $encoded_filename ."\"");
-		header("Content-Disposition: attachment; filename=\"" . $encoded_filename ."\"");
+		if (preg_match("/MSIE/", $ua))
+		{
+			header("Content-Disposition: attachment; filename=\"" . $encoded_filename ."\"");
+		}
+		else 
+		{
+			header("Content-Disposition: attachment; filename=\"" . $filename ."\"");
+		}
 		imagejpeg($this->im, NULL, 100);
 	}
 
@@ -157,6 +164,31 @@ class Photo
 			imagedestroy($this->im);
 		}
 	}
+
+	function imagecreatefromany($filepath)
+	{ 
+		$type = exif_imagetype($filepath); // [] if you don't have exif you could use getImageSize() 
+		$allowedTypes = array( 
+				2,  // [] jpg 
+				3,  // [] png 
+				6   // [] bmp 
+				); 
+		if (!in_array($type, $allowedTypes)) { 
+			return false; 
+		} 
+		switch ($type) { 
+			case 2 : 
+				$im = imagecreatefromjpeg($filepath); 
+				break; 
+			case 3 : 
+				$im = imagecreatefrompng($filepath); 
+				break; 
+			case 6 : 
+				$im = imagecreatefrombmp($filepath); 
+				break; 
+		}    
+		return $im;  
+	} 
 };
 
 class PhotoTypeParser

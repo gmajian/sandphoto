@@ -41,6 +41,9 @@ class Photo
 			case "blue":
 				$color = imagecolorallocate($this->im, 0, 0, 120);
 				break;
+			case "gray":
+				$color = imagecolorallocate($this->im, 128, 128, 128);
+				break;
 			default:
 				$color = imagecolorallocate($this->im, 0, 0, 120);
 		}

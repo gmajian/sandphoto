@@ -206,7 +206,7 @@ class PhotoTypeParser
 		$this->count = 0;
 		while (($line= fgets($fh)) !== FALSE)
 		{
-			$data = split(',', $line);
+			$data = explode(',', $line);
 			if (count($data) != 3) continue;
 
 			$this->name_array[$this->count] = $data[0];

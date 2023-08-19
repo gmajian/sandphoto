@@ -14,7 +14,7 @@
 
 <form id="sandphotoform" action="/sandphoto/sandphoto.php" method="POST" enctype="multipart/form-data"><strong>第一步</strong>, 选择你要冲洗的证件照片的尺寸：
 <?php
-include('sandphoto.inc');
+require_once('sandphoto.inc');
 $parser = new PhotoTypeParser();
 $parser->parse('phototype.txt');
 $parser->render_select('target_type', 0, 8);

@@ -1,5 +1,5 @@
 <?php
-include("sandphoto.inc");
+require_once("sandphoto.inc");
 
 $filename = "/var/www/sandcomp/apache/htdocs/sandphoto/sample.jpg";
 $temp_path = "/var/www/sandcomp/apache/htdocs/sandphoto/temp";

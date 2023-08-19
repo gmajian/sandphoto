@@ -1,5 +1,5 @@
 <?php
-include("sandphoto.inc");
+require_once("sandphoto.inc");
 
 
 if ((($_FILES["filename"]["type"] == "image/png")

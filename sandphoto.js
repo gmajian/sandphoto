@@ -13,13 +13,13 @@ function updatePreview()
 	$container_type = $("#container_type option:selected").val();
 	$bgcolorid= $("#sandphotoform input:radio:checked").val();
 	if ($target_type && $container_type && $bgcolorid) {
-		$("#previewImg").attr("src", "/sandphoto/preview.php?t=" + $target_type + "&c=" + $container_type + "&b=" + $bgcolorid);
+		$("#previewImg").attr("src", "/preview.php?t=" + $target_type + "&c=" + $container_type + "&b=" + $bgcolorid);
 	}
 }
 
 function checkForm()
 {
-	if ($("#filename").val() == "")
+	if ($("#filename").val() === "")
 	{
 		alert("请选择照片后再试");
 		return false;

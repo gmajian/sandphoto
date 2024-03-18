@@ -48,11 +48,13 @@
         <input id="bgcolorid" type="radio" name="bgcolorid" value="blue" checked> 蓝色
         <input id="bgcolorid" type="radio" name="bgcolorid" value="white"> 白色
         <input id="bgcolorid" type="radio" name="bgcolorid" value="gray"> 灰色
+        <input id="bgcolorid" type="radio" name="bgcolorid" value="red"> 红色
+        <input id="bgcolorid" type="radio" name="bgcolorid" value="green"> 绿色
     </div>
 
     将来的照片就是这个样子的：<br>
 
-    <img id="previewImg" alt="预览图像">
+    <img id="previewImg" alt="预览图像" src="">
     <br>
     <strong>第四步</strong>, 选择你的证件照片：
 

